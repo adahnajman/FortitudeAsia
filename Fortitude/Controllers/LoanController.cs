@@ -25,7 +25,7 @@ namespace Fortitude.Controllers
                 return 0.065 / 12;
         }
         #endregion
-
+         
         #region formula
         private double CalculateEMI(double principal, double monthlyInterestRate, int loanPeriodMonths)
         {
