@@ -42,17 +42,19 @@ namespace Fortitude.Controllers
         {
             try
             {
-                if (loanDetails.Amount <= 0 || loanDetails.Years <= 0)
+                if (loanDetails.Amount != 0 && loanDetails.Years != 0)
                 {
-                    return BadRequest("Invalid input values.");
+                    double monthlyRate = GetMonthlyInterestRate(loanDetails.Amount);
+                    int numOfPayment = loanDetails.Years * 12;
+
+                    double emi = CalculateEMI(loanDetails.Amount, monthlyRate, numOfPayment);
+
+                    return Ok(new { EMI = "RM " + emi.ToString("F2") });
                 }
-
-                double monthlyRate = GetMonthlyInterestRate(loanDetails.Amount);
-                int numOfPayment = loanDetails.Years * 12;
-
-                double emi = CalculateEMI(loanDetails.Amount, monthlyRate, numOfPayment);
-
-                return Ok(new { EMI = emi.ToString("F2") });
+                else
+                {
+                    return BadRequest("Invalid value");
+                }
             }
             catch(Exception ex)
             {
@@ -60,6 +62,10 @@ namespace Fortitude.Controllers
                 if(loanDetails.Amount < 5000)
                 {
                     message = "Minimum Amount is RM5000";
+                }
+                else if(loanDetails.Years <= 0)
+                {
+                    message = "Minimum Year is 1";
                 }
                 else
                 {
@@ -74,12 +80,27 @@ namespace Fortitude.Controllers
         [HttpGet("CalculateLoanPeriod")]
         public IActionResult CalculateLoanPeriod(double LoanAmount, double targetMonthlyInstallment)
         {
-            double interestRatePerAnnum = GetMonthlyInterestRate(LoanAmount); 
-            double monthlyInterestRate = interestRatePerAnnum / 12;
+            try
+            {
+                if (LoanAmount != 0 && targetMonthlyInstallment != 0)
+                {
+                    double interestRatePerYear = GetMonthlyInterestRate(LoanAmount);
+                    double monthlyInterestRate = interestRatePerYear / 12;
 
-            int loanPeriodInYears = CalculateLoanPeriod(LoanAmount, monthlyInterestRate, targetMonthlyInstallment);
+                    int loanPeriodInYears = CalculateLoanPeriod(LoanAmount, monthlyInterestRate, targetMonthlyInstallment);
 
-            return Ok(loanPeriodInYears);
+                    return Ok("Estimated Loan Period " + loanPeriodInYears + " Years");
+                }
+                else
+                {
+                    return BadRequest("Invalid value");
+                }
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+           
         }
 
         private int CalculateLoanPeriod(double LoanAmount, double monthlyInterestRate, double targetMonthlyInstallment)
@@ -102,13 +123,29 @@ namespace Fortitude.Controllers
         [HttpGet("CalculateLoanAmount")]
         public IActionResult CalculateLoanAmount(double monthlyInstallment, int loanTenureInYears, double interestRatePerAnnum)
         {
-            double monthlyInterestRate = interestRatePerAnnum / (12 * 100);
-            int numberOfPayments = loanTenureInYears * 12;
+            try
+            {
+                if(monthlyInstallment != 0 && loanTenureInYears != 0 && interestRatePerAnnum != 0)
+                {
+                    double monthlyInterestRate = interestRatePerAnnum / (12 * 100);
+                    int numberOfPayments = loanTenureInYears * 12;
 
-            double loanAmount = monthlyInstallment * (((Math.Pow(1 + monthlyInterestRate, numberOfPayments) - 1) / 
-                (monthlyInterestRate * Math.Pow(1 + monthlyInterestRate, numberOfPayments))));
+                    double loanAmount = monthlyInstallment * (((Math.Pow(1 + monthlyInterestRate, numberOfPayments) - 1) /
+                        (monthlyInterestRate * Math.Pow(1 + monthlyInterestRate, numberOfPayments))));
 
-            return Ok(loanAmount);
+                    return Ok("Estimated Loan Amount RM " + loanAmount.ToString("F0"));
+                }
+                else
+                {
+                    return BadRequest("Invalid value");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
         #endregion
     }

@@ -14,13 +14,20 @@ namespace Fortitude.Controllers
             _service = new AlgorithmServices();
         }
         #region Task 2
-        [HttpGet("special-digit/{value}")]
-        public ActionResult<int> GetSpecialDigit(string value)
+        [HttpGet("specialdigit")]
+        public IActionResult specialdigit(string specialValue)
         {
             try
             {
-                int specialDigit = _service.CalculateSpecialDigit(value);
-                return Ok(specialDigit);
+                if (specialValue != null)
+                {
+                    int specialDigit = _service.CalculateSpecialDigit(specialValue);
+                    return Ok(specialDigit);
+                }
+                else
+                {
+                    return BadRequest("Invalid value");
+                }
             }
             catch (Exception ex)
             {
@@ -29,7 +36,7 @@ namespace Fortitude.Controllers
         }
 
         [HttpGet("specialDigitOccurrence")]
-        public ActionResult<string> GetSpecialDigitDistribution()
+        public IActionResult specialDigitOccurrence()
         {
             try
             {
@@ -44,13 +51,20 @@ namespace Fortitude.Controllers
         #endregion
 
         #region Task 3
-        [HttpGet("OrderByAlgorithm")]
-        public ActionResult<string> OrderByAlgorithm(string input, int ordering)
+        [HttpPost("OrderByAlgorithm")]
+        public IActionResult OrderByAlgorithm(string input, int ordering)
         {
             try
             {
-                var result = orderByAlgorithm(input.ToCharArray(), ordering);
-                return new string(result);
+                if(input != null && ordering !=0)
+                {
+                    var result = orderByAlgorithm(input.ToCharArray(), ordering);
+                    return Ok(new string(result));
+                }
+                else
+                {
+                    return BadRequest("Invalid value");
+                }
             }
             catch(Exception ex)
             {
@@ -61,23 +75,22 @@ namespace Fortitude.Controllers
 
         public static char[] orderByAlgorithm(char[] input, int ordering)
         {
-            List<char> result = new List<char>();
-            List<char> inputList = new List<char>(input);
-            int currentIndex = 0;
+            List<char> NewInput = new List<char>();
+            List<char> Remaining = new List<char>(input);
+            int Index = 0;
 
-            while (inputList.Count > 0)
+            while (Remaining.Count > 0)
             {
-                currentIndex = (currentIndex + ordering - 1) % inputList.Count;
-                result.Add(inputList[currentIndex]);
-                inputList.RemoveAt(currentIndex);
+                Index = (Index + ordering - 1) % Remaining.Count;
+                NewInput.Add(Remaining[Index]);
+                Remaining.RemoveAt(Index);
 
-                // Add '-' after every 3rd character in the result
-                if (result.Count % 4 == 3 && inputList.Count > 0)
+                if (NewInput.Count % 4 == 3 && Remaining.Count > 0)
                 {
-                    result.Add('-');
+                    NewInput.Add('-'); //add - after 3rd char
                 }
             }
-            return result.ToArray();
+            return NewInput.ToArray();
         }
         #endregion
 

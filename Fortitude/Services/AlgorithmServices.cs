@@ -42,13 +42,13 @@
             var HighFrequency = frequency.OrderByDescending(x => x.Value).First();
             var lowFrequency = frequency.OrderBy(x => x.Value).First();
 
-            string result = "Special Digit Occurence:\n";
+            string result = "Special Digit:\n";
             foreach (var item in frequency)
             {
                 result += $"Digit {item.Key}: {item.Value}\n";
             }
-            result += $"\nMost frequent digit: {HighFrequency.Key} with {HighFrequency.Value} occurrences\n";
-            result += $"Least frequent digit: {lowFrequency.Key} with {lowFrequency.Value} occurrences\n";
+            result += $"\nMost High digit: {HighFrequency.Key} : {HighFrequency.Value} occurrences\n";
+            result += $"Least digit: {lowFrequency.Key} : {lowFrequency.Value} occurrences\n";
 
             return result;
         }
